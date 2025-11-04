@@ -5,6 +5,7 @@ import Header from './components/header/header.component';
 import HomePage from './pages/home-page/home-page';
 import LoginPage from './pages/login-page/login-page';
 import TarefaPage from './pages/tarefa-page/tarefa-page';
+import TarefaCadastroPage from './pages/tarefa-page/tarefa-cadastro-page';
 import TipoPage from './pages/tipo-page/tipo-page';
 import TipoCadastroPage  from './pages/tipo-page/tipo-cadastro-page';
 import PrivateRoute from './components/private-route/private-route';
@@ -54,6 +55,14 @@ return (
           element={
             <PrivateRoute>
               <TarefaPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tarefa/cadastro"
+          element={
+            <PrivateRoute>
+              <TarefaCadastroPage />
             </PrivateRoute>
           }
         />

@@ -7,7 +7,7 @@ export default function PrivateRoute({ children }) {
   const usuario = authService.usuarioAutenticado();
 
   // Se não tiver usuário logado, redireciona para /login
-  if (false) {
+  if (!usuario) {
     authService.logout();
     return <Navigate to="/login" replace />;
   }

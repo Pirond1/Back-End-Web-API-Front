@@ -3,15 +3,19 @@ import api from "./api.service";
 export default class AuthService {
 
     async authenticate (dados) {
-        const result = await api.post('/api/Seguranca', dados);
+        try{
+            const result = await api.post('/api/login/auth', dados);
 
-        if (result){
-            localStorage.setItem("access_token", result.data.access_token)
-            localStorage.setItem("usuario", dados.user)
+            if (result){
+                localStorage.setItem("access_token", result.data.access_token)
+                localStorage.setItem("usuario", dados.usuario)
+                return true;
+            }
 
-            return true;
+        } catch (error) {
+            console.error("Erro na autenticação: ", error);
+            return false
         }
-
         return false;
     }
 
@@ -24,7 +28,7 @@ export default class AuthService {
     }
 
     getToken () {
-        return localStorage.getItem("acess_token");
+        return localStorage.getItem("access_token");
     }
     
     async logout () {
