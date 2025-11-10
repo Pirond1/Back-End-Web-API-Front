@@ -14,19 +14,29 @@ function Header(props) {
         navigate("/login");
     }
 
+    const handleTitle = () => {
+        navigate("/");
+    }
+
     useEffect(() => {
         setUsuario(authService.getUsuario())
     }, []);
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm px-3">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
             <div className="container-fluid">
                 {/* Logo / título */}
                 <a
-                    className="navbar-brand fw-bold text-white"
+                    className="navbar-brand fw-bold text-white d-flex align-items-center"
                     href="#"
-                    onClick={props.onTitleClicked}
+                    onClick={handleTitle}
                 >
+                    <img
+                        src="/logo192.png"
+                        alt="Logo Gerenciador"
+                        style={{height: "40px", marginRight: "10px"}}
+                        className="rounded"
+                    />
                     {props.title}
                 </a>
 
@@ -44,13 +54,8 @@ function Header(props) {
                 </button>
 
                 {/* Links de navegação */}
-                <div className="collapse navbar-collapse" id="navbarNav">
+                <div className="collapse navbar-collapse" id="navbarNav" style={{paddingRight: "10px"}}>
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li className="nav-item">
-                            <Link to="/" className="nav-link text-white">
-                                Home
-                            </Link>
-                        </li>
                         <li className="nav-item">
                             <Link to="/tarefa" className="nav-link text-white">
                                 Tarefas

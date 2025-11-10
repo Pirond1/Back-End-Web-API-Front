@@ -3,35 +3,75 @@ import { useNavigate } from "react-router-dom";
 import TarefaService from "../../services/tarefa.service";
 import AuthService from "../../services/auth.service";
 import "./tarefa-page.css";
+import TipoTarefaService from "../../services/tipotarefa.service";
+import TarefaModal from "./tarefa-modal"
 
 function TarefaPage() {
     const service = new TarefaService();
+    const tipoService = new TipoTarefaService();
     const auth = new AuthService();
     const navigate = useNavigate();
 
     const handleCadastrar = () => {
-        navigate("tarefa/cadastro");
+        navigate("/tarefa/cadastro");
     };
 
     const [mesAtual, setMesAtual] = useState(new Date());
-
     const [diasDoMes, setDiasDoMes] = useState([]);
-
     const [tarefasAgrupadas, setTarefasAgrupadas] = useState({});
+    const [tiposTarefa, setTiposTarefa] = useState([]);
+    const [filtroTipoId, setFiltroTipoId] = useState("");
+    const [modalAberta, setModalAberta] = useState(false);
+    const [tarefaSelecionada, setTarefaSelecionada] = useState(null)
+    const [hojeMeiaNoite] = useState(() => {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        return hoje
+    })
+    const [filtroStatus, setFiltroStatus] = useState("todos");
 
     useEffect(() => {
         listarTarefas();
-    }, []);
+    }, [mesAtual, filtroTipoId, filtroStatus]);
 
     useEffect(() => {
         gerarCalendario(mesAtual);
     }, [mesAtual, tarefasAgrupadas]);
 
+    useEffect(() => {
+        async function carregarTipos(){
+            try {
+                const response = await tipoService.listar();
+                setTiposTarefa(response.data || []);
+            }catch (error) {
+                console.log(error)
+            }
+        }
+        carregarTipos()
+    }, [])
+
     async function listarTarefas() {
         try {
-        const response = await service.listar();
-        const tarefas = response.data || [];
+        const response = await service.listar(filtroTipoId);
+        let tarefas = response.data || [];
+        
+        if (filtroStatus !== "todos"){
+            tarefas = tarefas.filter((tarefa) => {
+                const status = !!tarefa.status;
+                let dataTarefa = parseISODate(tarefa.dataVencimento)
 
+                if (filtroStatus == "concluidas"){
+                    return status;
+                }
+                if (filtroStatus == "atrasadas"){
+                    return !status && dataTarefa && dataTarefa < hojeMeiaNoite
+                }
+                if (filtroStatus == "pendentes"){
+                    return !status && (!dataTarefa || dataTarefa >= hojeMeiaNoite)
+                }
+                return false
+            });
+        }  
         const agrupadas = tarefas.reduce((acc, tarefa) => {
             if (tarefa.dataVencimento) {
             const dataChave = tarefa.dataVencimento.split("T")[0];
@@ -51,6 +91,12 @@ function TarefaPage() {
             navigate("/login");
         }
         }
+    }
+
+    function parseISODate(dateString) {
+        if (!dateString) return null;
+        const [year, month, day] = dateString.split("T")[0].split("-").map(Number);
+        return new Date(year, month -1, day);
     }
 
     function gerarCalendario(data) {
@@ -89,6 +135,42 @@ function TarefaPage() {
         setMesAtual(new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 1));
     };
 
+    const handleAbrirModal = (tarefa) => {
+        setTarefaSelecionada(tarefa);
+        setModalAberta(true);
+    }
+
+    const handleFecharModal = () => {
+        setModalAberta(false);
+        setTarefaSelecionada(null);
+    }
+
+    const handleSalvarTarefa = async (tarefaEditada) => {
+        try {
+            await service.atualizar(tarefaEditada.id, tarefaEditada);
+            handleFecharModal();
+            listarTarefas();
+            alert("Tarefa atualizada com sucesso!");
+        }catch (error){
+            console.error(error);
+            alert("Erro ao atualizar a tarefa")
+        }
+    }
+
+    const handleExcluirTarefa = async (tarefaId) => {
+        if (window.confirm("Tem certeza que deseja excluir essa tarefa?")){
+            try{
+                await service.deletar(tarefaId);
+                handleFecharModal();
+                listarTarefas();
+                alert("Tarefa excluida com sucesso!")
+            }catch (error){
+                console.error(error);
+                alert("Erro ao excluir a tarefa")
+            }
+        }
+    }
+
     return (
         <div className="container-fluid mt-4">
             <div className="d-flex justify-content-center align-items-center mb-4 position-relative">
@@ -106,7 +188,29 @@ function TarefaPage() {
                     &gt;
                 </button>
                 </div>
-                <div style={{ position: "absolute", right: 0 }}>
+                <div style={{ position: "absolute", right: 0, display: "flex", alignItems: "center"}}>
+                    <select
+                        className="form-select me-2"
+                        style={{width: '200px'}}
+                        value={filtroTipoId}
+                        onChange={(e) => setFiltroTipoId(e.target.value)}
+                    >
+                        <option value="">Todos os Tipos</option>
+                        {tiposTarefa.map(tipo => (
+                            <option key={tipo.id} value={tipo.id}>{tipo.nome}</option>
+                        ))}
+                    </select>
+                    <select
+                        className="form-select me-2"
+                        style={{ width: "200px" }}
+                        value={filtroStatus}
+                        onChange={(e) => setFiltroStatus(e.target.value)}
+                    >
+                        <option value="todos">Todos os Status</option>
+                        <option value="pendentes">Pendentes</option>
+                        <option value="atrasadas">Atrasadas</option>
+                        <option value="concluidas">Concluídas</option>
+                    </select>
                     <button
                     onClick={handleCadastrar}
                     className="btn btn-success"
@@ -136,28 +240,42 @@ function TarefaPage() {
 
                     {celula.tarefas && (
                         <div className="tasks-list">
-                            {celula.tarefas.map((tarefa) => (
-                            <div key={tarefa.id} className="task-item">
-                                {/* 1. Título da Tarefa */}
-                                <div className="task-title">{tarefa.titulo}</div>
-                                
-                                {/* 2. Tipo da Tarefa (NOVO) */}
-                                {/* Usamos 'tarefa.tipotarefa &&' para evitar erros
-                                    se o tipo for nulo */}
-                                {tarefa.tipotarefa && (
-                                <div className="task-type">
-                                    {/* O '?' (optional chaining) previne erro
-                                        se tipotarefa for nulo */}
-                                    {tarefa.tipotarefa?.nome}
-                                </div>
-                                )}
-                            </div>
-                            ))}
+                            {celula.tarefas.map((tarefa) => {
+                                let className = "task-item";
+                                const status = !!tarefa.status;
+                                let dataTarefa = parseISODate(tarefa.dataVencimento)
+
+                                if(status){
+                                    className = "task-item completed";
+                                }else if (dataTarefa && dataTarefa < hojeMeiaNoite){
+                                    className = "task-item overdue";
+                                }
+                                const corTipo = tarefa.tipotarefa?.cor || "#808080"
+                                return (
+                                    <div key={tarefa.id} className={className} onClick={() => handleAbrirModal(tarefa)}>
+                                        <div className="task-title">{tarefa.titulo}</div>
+
+                                        {tarefa.tipotarefa && (
+                                        <div className="task-type" style={{color: corTipo}}>
+                                            {tarefa.tipotarefa?.nome}
+                                        </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
                 ))}
             </div>
+            {modalAberta && (
+                <TarefaModal
+                    tarefa={tarefaSelecionada}
+                    onClose={handleFecharModal}
+                    onSave={handleSalvarTarefa}
+                    onDelete={handleExcluirTarefa}
+                />
+            )}
         </div>
     );
 }

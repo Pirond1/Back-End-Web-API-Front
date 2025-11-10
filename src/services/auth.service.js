@@ -19,8 +19,18 @@ export default class AuthService {
         return false;
     }
 
+    async register (dados) {
+        try {
+            await api.post("/api/login", dados);
+            return true;
+        }catch (error){
+            console.error("Erro no cadastro: ", error)
+            return false;
+        }
+    }
+
     usuarioAutenticado () {
-        return localStorage.getItem("access_token") != undefined ? true : false;
+        return localStorage.getItem("access_token") !== undefined ? true : false;
     }
 
     getUsuario () {

@@ -119,7 +119,7 @@ function TarefaCadastroPage() {
             </label>
             <input
               id="dataVencimento"
-              type="datetime-local"
+              type="date"
               className="form-control"
               value={dataVencimento}
               onChange={(e) => setDataVencimento(e.target.value)}

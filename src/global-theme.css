@@ -1,0 +1,21 @@
+.bg-primary {
+    background-color: #008080 !important; 
+}
+
+.btn-primary {
+    --bs-btn-bg: #008080;
+    --bs-btn-border-color: #008080;
+    --bs-btn-hover-bg: #006666;
+    --bs-btn-hover-border-color: #006666;
+    --bs-btn-active-bg: #005050;
+    --bs-btn-active-border-color: #005050;
+}
+
+.btn-success {
+    --bs-btn-bg: #4DB6AC; 
+    --bs-btn-border-color: #4DB6AC;
+    --bs-btn-hover-bg: #38A29A;
+    --bs-btn-hover-border-color: #38A29A;
+    --bs-btn-active-bg: #278d85;
+    --bs-btn-active-border-color: #278d85;
+}

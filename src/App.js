@@ -2,8 +2,8 @@ import { useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import Header from './components/header/header.component';
-import HomePage from './pages/home-page/home-page';
 import LoginPage from './pages/login-page/login-page';
+import RegisterPage from './pages/login-page/register-page';
 import TarefaPage from './pages/tarefa-page/tarefa-page';
 import TarefaCadastroPage from './pages/tarefa-page/tarefa-cadastro-page';
 import TipoPage from './pages/tipo-page/tipo-page';
@@ -16,7 +16,7 @@ function App() {
   const location = useLocation();
 
   // Define em quais rotas o Header NÃO deve aparecer
-  const rotasSemHeader = ["/login"];
+  const rotasSemHeader = ["/login", "/register"];
   const exibirHeader = !rotasSemHeader.includes(location.pathname);
 
 return (
@@ -32,21 +32,14 @@ return (
       <Routes>
         {/* Login sem header */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Rotas protegidas */}
         <Route
           path="/"
           element={
             <PrivateRoute>
-              <HomePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/home"
-          element={
-            <PrivateRoute>
-              <HomePage />
+              <TarefaPage />
             </PrivateRoute>
           }
         />

@@ -2,21 +2,34 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 
-function LoginPage() {
+function RegisterPage() {
   const auth = new AuthService();
   const navigate = useNavigate();
 
   const [usuario, setUsuario] = useState("");
   const [senha, setSenha] = useState("");
-
-
+  const [confirmarSenha, setConfirmarSenha] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    setLoading(true);
+  const validarFormulario = () => {
+    if (!usuario || !senha || !confirmarSenha) {
+      setError("Todos os campos são obrigatórios.");
+      return false;
+    }
+    if (senha !== confirmarSenha) {
+      setError("As senhas não conferem.");
+      return false;
+    }
     setError("");
+    return true;
+  };
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    if (!validarFormulario()) return;
+
+    setLoading(true);
 
     let dados = {
       usuario: usuario,
@@ -24,16 +37,17 @@ function LoginPage() {
     };
 
     try {
-      const sucesso = await auth.authenticate(dados);
+      const sucesso = await auth.register(dados);
 
       if (sucesso) {
-        navigate("/tarefa");
+        alert("Cadastro realizado com sucesso! Faça o login.");
+        navigate("/login");
       } else {
-        setError("Usuário ou senha inválidos.");
+        setError("Erro ao realizar o cadastro. Usuário já utilizado.");
       }
     } catch (err) {
       console.log(err);
-      setError("Ocorreu um erro ao tentar fazer login.");
+      setError("Ocorreu um erro inesperado.");
     } finally {
       setLoading(false);
     }
@@ -47,7 +61,7 @@ function LoginPage() {
       >
         <div className="card-body p-4">
           <h4 className="text-center mb-4 text-primary fw-bold">
-            Login no Sistema
+            Criar Nova Conta
           </h4>
 
           {error && (
@@ -56,7 +70,8 @@ function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
+            {/* Campo Usuário */}
             <div className="form-group mb-3">
               <label htmlFor="usuario" className="form-label fw-semibold">
                 Usuário
@@ -65,13 +80,14 @@ function LoginPage() {
                 type="text"
                 id="usuario"
                 className="form-control form-control-lg"
-                placeholder="Digite seu usuário"
+                placeholder="Escolha um nome de usuário"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 required
               />
             </div>
 
+            {/* Campo Senha */}
             <div className="form-group mb-3">
               <label htmlFor="senha" className="form-label fw-semibold">
                 Senha
@@ -80,9 +96,28 @@ function LoginPage() {
                 type="password"
                 id="senha"
                 className="form-control form-control-lg"
-                placeholder="Digite sua senha"
+                placeholder="Crie uma senha"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Campo Confirmar Senha */}
+            <div className="form-group mb-3">
+              <label
+                htmlFor="confirmarSenha"
+                className="form-label fw-semibold"
+              >
+                Confirmar Senha
+              </label>
+              <input
+                type="password"
+                id="confirmarSenha"
+                className="form-control form-control-lg"
+                placeholder="Repita a senha"
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
                 required
               />
             </div>
@@ -92,13 +127,14 @@ function LoginPage() {
               className="btn btn-primary btn-lg w-100 mt-3"
               disabled={loading}
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </form>
+
+          {/* Link para voltar ao Login */}
           <div className="text-center mt-3">
             <small>
-              Não tem uma conta?{" "}
-              <Link to="/register">Cadastre-se aqui!</Link>
+              Já tem uma conta? <Link to="/login">Faça o login</Link>
             </small>
           </div>
         </div>
@@ -107,4 +143,4 @@ function LoginPage() {
   );
 }
 
-export default LoginPage;
+export default RegisterPage;

@@ -8,6 +8,7 @@ function TipoCadastroPage() {
   const service = new TipoTarefaService();
 
   const [nome, setNome] = useState("");
+  const [cor, setCor] = useState("#808080")
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -22,12 +23,12 @@ function TipoCadastroPage() {
       setError("O 'Nome' deve ter no máximo 100 caracteres.");
       return false;
     }
+    if (!cor){
+      setError("O campo 'Cor é obrigatório'")
+      return false;
+    }
     setError(null);
     return true;
-  };
-
-  const limparDados = () => {
-    setNome("");
   };
 
   const handleSubmit = async (e) => {
@@ -36,13 +37,13 @@ function TipoCadastroPage() {
     if (!validarFormulario()) {
       return;
     }
-
     setLoading(true);
     setError(null);
 
     const payload = {
       id: id ? parseInt(id) : 0,
       nome: nome.trim(),
+      cor: cor,
     };
 
     try {
@@ -68,6 +69,7 @@ function TipoCadastroPage() {
       const response = await service.selecionar(id);
       const tipo = response.data;
       setNome(tipo.nome);
+      setCor(tipo.cor || "#808080")
     } catch (err) {
       console.log(err);
       setError("Erro ao carregar os dados.");
@@ -99,21 +101,36 @@ function TipoCadastroPage() {
 
 
       <form className="mt-4" onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="nome" className="form-label">
-            Nome *
-          </label>
-          <input
-            id="nome"
-            type="text"
-            className="form-control"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            placeholder="Digite o nome do tipo (ex: Trabalho)"
-            maxLength={100}
-            required
-          />
-          <div className="form-text">Obrigatório. Máx. 20 caracteres.</div>
+        <div className="row">
+          <div className="col-md-8 mb-3">
+            <label htmlFor="nome" className="form-label">
+              Nome *
+            </label>
+            <input
+              id="nome"
+              type="text"
+              className="form-control"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Digite o nome do tipo (ex: Trabalho)"
+              maxLength={20}
+              required
+            />
+            <div className="form-text">Obrigatório. Máx. 20 caracteres.</div>
+          </div>
+          <div className="col-md-4 mb-3">
+            <label htmlFor="cor" className="form-label">
+              Cor
+            </label>
+            <input
+              id="cor"
+              type="color"
+              className="form-control form-control-color"
+              value={cor}
+              onChange={(e) => setCor(e.target.value)}
+              title="Escolha uma cor"
+            />
+          </div>
         </div>
 
 

@@ -1,8 +1,12 @@
 import api from "./api.service";
 
 export default class TarefaService {
-  async listar() {
-    return api.get("/api/tarefa");
+  async listar(tipoId) {
+    let url = "/api/tarefa"
+    if(tipoId){
+      url += `?idTipoTarefa=${tipoId}`
+    }
+    return api.get(url);
   }
 
   async selecionar(id) {

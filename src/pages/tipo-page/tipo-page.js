@@ -43,8 +43,19 @@ function TipoPage() {
     };
 
     async function listar() {
-        const response = await service.listar();
-        setTiposTarefa(response.data || []);
+        try {
+            const response = await service.listar();
+            response.data.sort((a, b) => a.nome.localeCompare(b.nome));
+            setTiposTarefa(response.data || []);
+        }catch (error){
+            console.log(error);
+
+            if(error.response?.status === 401){
+                auth.logout();
+                navigate("/login");
+            }
+        }
+        
     }
 
     useEffect(() => {
@@ -74,8 +85,8 @@ function TipoPage() {
             <table className="table mt-4">
             <thead>
                 <tr>
-                <th scope="col">ID</th>
                 <th scope="col">Nome</th>
+                <th scope="col">Cor</th>
                 <th scope="col" className="text-end">
                     Ação
                 </th>
@@ -84,8 +95,8 @@ function TipoPage() {
             <tbody>
                 {tiposTarefa.map((tipo) => (
                 <tr key={tipo.id}>
-                    <th scope="row">{tipo.id}</th>
                     <td>{tipo.nome}</td>
+                    <td><div style={{width: "24px", height: "24px", backgroundColor: tipo.cor, border: "1px solid #ccc", borderRadius: "4px"}} title={tipo.cor}></div></td>
                     <td className="text-end">
                     <button
                         type="button"
