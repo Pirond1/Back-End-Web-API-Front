@@ -71,7 +71,7 @@ function Header(props) {
                     {/* Usuário logado */}
                     {usuario && (
                         <span className="navbar-text text-white me-3 fw-semibold">
-                        Sejá bem vindo, {usuario}
+                        Seja bem vindo, {usuario}
                         </span>
                     )}
 
