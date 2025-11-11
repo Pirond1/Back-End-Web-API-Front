@@ -180,9 +180,10 @@ function TarefaPage() {
                 </button>
                 <h3 className="mb-0 mx-4">
                     {mesAtual.toLocaleString("pt-BR", {
-                    month: "long",
-                    year: "numeric",
+                    month: "short",
                     })}
+                    {" "}
+                    {mesAtual.getFullYear()}
                 </h3>
                 <button onClick={proximoMes} className="btn btn-outline-primary">
                     &gt;
